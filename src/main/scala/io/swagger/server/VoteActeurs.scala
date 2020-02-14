@@ -63,6 +63,7 @@ class PollManager extends ActorLogging with Actor {
 
     }
     case GetListChoixByIdPoll(idpoll) => {
+      println("receive")
       val poll = polls.getOrElse(idpoll, null)
       if (poll != null) {
         sender ! Some(poll.choix)
@@ -109,24 +110,34 @@ class VoteManager(pollManager: ActorRef) extends ActorLogging with Actor {
       implicit val timeout = new Timeout(2 seconds)
       implicit val executionContext = context.dispatcher
 
+      println("wa7ed hna ")
+
 
       val listChoixByIdPoll: Future[Option[List[Choix]]] =
-        (pollManager ? PollManager.GetListChoixByIdPoll(idPoll)).mapTo(Option[List[Choix]])
+        (pollManager ? PollManager.GetListChoixByIdPoll(idPoll)).mapTo[Option[List[Choix]]]
       listChoixByIdPoll.map {
         case None => sender ! Right(Error("404"))
         case Some(listchoix: List[Choix]) =>
+          println("0")
+
           var stats = Stat(0, Nil)
           for {
             ch <- listchoix
             vo <- votes.values.toList
             if (ch.id.get == vo.idChoix)
           } yield {
+            println("1")
+
             stats = stats.copy(nb_participants = stats.nb_participants + 1, votes = {
               val statVoteIdx: Int = stats.votes.indexWhere(st => st.id_choix == vo.idChoix)
               if (statVoteIdx != -1) {
+                println("3")
+
                 val volState = stats.votes(statVoteIdx)
                 stats.votes.updated(statVoteIdx, volState.copy(percentage = volState.percentage + 1))
               } else {
+                println("4")
+
                 stats.votes :+ Stat_votes(vo.idChoix, 1.0)
               }
             })
@@ -134,7 +145,7 @@ class VoteManager(pollManager: ActorRef) extends ActorLogging with Actor {
 
           // divide each percentage by the total to get the right value
           stats = stats.copy(votes = stats.votes.map(st => st.copy(percentage = (st.percentage / stats.nb_participants) * 100)))
-
+          println("toto")
           sender ! Left(stats)
       }
   }

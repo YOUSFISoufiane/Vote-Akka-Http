@@ -86,23 +86,22 @@ class DefaultApi(
 
 
         }
+      } ~
+      path("vote" / "stats" / IntNumber) { (idPoll) =>
+        get {
+
+
+
+
+
+          defaultService.voteStatsIdPollGet(idPoll = idPoll)
+
+
+
+
+
+        }
       }
-//  ~
-//      path("vote" / "stats" / IntNumber) { (idPoll) =>
-//        get {
-//
-//
-//
-//
-//
-//          defaultService.voteStatsIdPollGet(idPoll = idPoll)
-//
-//
-//
-//
-//
-//        }
-//      }
 }
 
 trait DefaultApiService {
