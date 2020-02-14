@@ -1,6 +1,7 @@
 package io.swagger.server.model
 
 import java.util.Date
+import java.time.OffsetDateTime
 
 /**
  * @param id

@@ -6,11 +6,13 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
 import akka.util.Timeout
+import io.swagger.server.PollManager._
+import io.swagger.server.VoteManager._
 import io.swagger.server.api.{DefaultApi, DefaultApiMarshaller, DefaultApiService}
 import io.swagger.server.enums.Dupcheck
 import io.swagger.server.enums.Dupcheck.Dupcheck
-import io.swagger.server.{PollManager, model}
-import io.swagger.server.model.{Choix, Error, Poll, Stat, Vote, Stat_votes}
+import io.swagger.server.{PollManager, VoteManager, model}
+import io.swagger.server.model.{Choix, Error, Poll, Stat, Stat_votes, Vote}
 import spray.json.RootJsonFormat
 
 import scala.concurrent.duration._
@@ -31,6 +33,8 @@ object Main extends App {
   implicit val timeout = new Timeout(2 seconds)
 
   val pollManager: ActorRef = system.actorOf(PollManager())
+  val voteManager: ActorRef = system.actorOf(VoteManager(pollManager))
+
 
   //
   implicit val executionContext = system.dispatcher
@@ -46,8 +50,9 @@ object Main extends App {
     override implicit def toEntityMarshallerError: ToEntityMarshaller[Error] = jsonFormat1(Error)
 
     override implicit def toEntityMarshallerPollarray: ToEntityMarshaller[List[Poll]] = listFormat(jsonFormat5(Poll))
+    override implicit def toEntityMarshallerPoll: ToEntityMarshaller[Poll] = jsonFormat5(Poll)
 
-    override implicit def toEntityMarshallerStat: ToEntityMarshaller[Stat] = jsonFormat3(Stat)
+    override implicit def toEntityMarshallerStat: ToEntityMarshaller[Stat] = jsonFormat2(Stat)
 
     //    implicit val dupcheck: RootJsonFormat[Dupcheck] = jsonFormat3(Dupcheck)
     //    implicit val : RootJsonFormat[Choix] = jsonFormat3(Choix)
@@ -109,23 +114,56 @@ object Main extends App {
 
     /**
      * Code: 204, Message: OK
+     * Code: 404, Message: Not found, DataType: Error
      * Code: 400, Message: Bad Request, DataType: Error
      * Code: 422, Message: Unexpected error, DataType: Error
      */
-    override def pollPut(body: Poll, idPoll: Int)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = ???
+    override def pollPut(body: Poll, idPoll: Int)(implicit toEntityMarshallerPoll: ToEntityMarshaller[Poll], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+      val response = (pollManager ? PollManager.PutPoll(idPoll,body)).mapTo[Option[Error]]
+      requestcontext =>
+        response.flatMap {
+          case None
+          => pollPut204(requestcontext)
+          case Some(Error("404"))
+          => pollPut404(Error("404"))(toEntityMarshallerError)(requestcontext)
+          case Some(err)
+          => pollPost422(err)(toEntityMarshallerError)(requestcontext)
 
+        }
+    }
     /**
      * Code: 201, Message: Vote added
      * Code: 400, Message: Bad Request, DataType: Error
      * Code: 422, Message: Unexpected error, DataType: Error
      */
-    override def votePost(body: Vote)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = ???
+    override def votePost(body: Vote)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+      val response = (voteManager ? VoteManager.PostVote(body)).mapTo[Option[Error]]
+      requestcontext =>
+        response.flatMap {
+          case None
+          => votePost201(requestcontext)
+          case Some(err)
+          => votePost422(err)(toEntityMarshallerError)(requestcontext)
+
+        }
+
+    }
 
     /**
      * Code: 200, Message: a stat object, DataType: Stat
      * Code: 422, Message: Unexpected error, DataType: Error
      */
-    override def voteStatsIdPollGet(idPoll: Int)(implicit toEntityMarshallerStat: ToEntityMarshaller[Stat], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = ???
+    override def voteStatsIdPollGet(idPoll: Int)(implicit toEntityMarshallerStat: ToEntityMarshaller[Stat], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+      val response = (voteManager ? VoteManager.GetStatsById).mapTo[Either[Stat, Error]]
+      requestcontext =>
+        response.flatMap {
+          case Left(res)
+          => voteStatsIdPollGet200(res)(toEntityMarshallerStat)(requestcontext)
+          case Right(err: Error)
+          => voteStatsIdPollGet422(err)(toEntityMarshallerError)(requestcontext)
+        }
+
+    }
   }
 
   val api = new DefaultApi(DefaultService, DefaultMarshaller)

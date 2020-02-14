@@ -8,7 +8,7 @@ import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import io.swagger.server.AkkaHttpHelper._
 import io.swagger.server.model
 import io.swagger.server.model.{Choix, Error, Poll, Stat, Stat_votes, Vote}
-import spray.json.DefaultJsonProtocol.{jsonFormat2, jsonFormat3, listFormat}
+import spray.json.DefaultJsonProtocol.{jsonFormat2, jsonFormat3, jsonFormat5, listFormat}
 import spray.json.RootJsonFormat
 
 class DefaultApi(
@@ -62,38 +62,32 @@ class DefaultApi(
 
 
         }
-      }
-//  ~
-//      path("poll") { (idPoll) =>
-//        put {
-//
-//
-//
+      } ~
+//      path("poll") {
+//        (idPoll) => put {
 //
 //          entity(as[Poll]){ body =>
 //            defaultService.pollPut(body = body, idPoll = idPoll)
 //          }
 //
-//
-//
-//
 //        }
 //      } ~
-//      path("vote") {
-//        post {
-//
-//
-//
-//
-//          entity(as[Vote]){ body =>
-//            defaultService.votePost(body = body)
-//          }
-//
-//
-//
-//
-//        }
-//      } ~
+      path("vote") {
+        post {
+
+
+
+
+          entity(as[Vote]){ body =>
+            defaultService.votePost(body = body)
+          }
+
+
+
+
+        }
+      }
+//  ~
 //      path("vote" / "stats" / IntNumber) { (idPoll) =>
 //        get {
 //
@@ -151,6 +145,8 @@ trait DefaultApiService {
 
   def pollPut204: Route =
     complete((204, "OK"))
+  def pollPut404(responseError: Error)(implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route =
+    complete((404, responseError))
   def pollPut400(responseError: Error)(implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route =
     complete((400, responseError))
   def pollPut422(responseError: Error)(implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route =
@@ -161,7 +157,7 @@ trait DefaultApiService {
    * Code: 422, Message: Unexpected error, DataType: Error
    */
   def pollPut(body: Poll, idPoll: Int)
-             (implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route
+             (implicit toEntityMarshallerPoll: ToEntityMarshaller[Poll], toEntityMarshallerError: ToEntityMarshaller[Error]): Route
 
   def votePost201: Route =
     complete((201, "Vote added"))
@@ -203,6 +199,7 @@ trait DefaultApiMarshaller {
   implicit def toEntityMarshallerError: ToEntityMarshaller[Error]
 
   implicit def toEntityMarshallerPollarray: ToEntityMarshaller[List[Poll]]
+  implicit def toEntityMarshallerPoll: ToEntityMarshaller[Poll]
 
 
 

@@ -7,7 +7,7 @@ package io.swagger.server.model
  * @param votes 
  */
 case class Stat (
-  id_poll: Int,
+//  id_poll: Int,
   nb_participants: Int,
   votes: List[Stat_votes]
 )

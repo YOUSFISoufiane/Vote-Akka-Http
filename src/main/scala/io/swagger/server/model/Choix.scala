@@ -11,8 +11,8 @@ package io.swagger.server.model
  * @param idPoll 
  */
 case class Choix (
-  id: Int,
+  id: Option[Int],
   content: String,
-  idPoll: Int
+  idPoll: Option[Int]
 )
 
