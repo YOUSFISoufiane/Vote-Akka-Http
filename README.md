@@ -1,7 +1,7 @@
 # Vote Akka Http API ---  PMR PLS 2019/2020 
 
 L’API est documentée au format OpenApi 3 en Ligne Sur Swagger Hub : https://app.swaggerhub.com/apis/Souf/PMR-PROJECT-VOTE-API-AKKAHTTP/1.0.0
- et/ou dans le fichier [./openapi.yaml](http://github.com)
+ et/ou dans le fichier [./openapi.yaml](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/openapi.yaml)
 
 ## Definition du Projet :
 Ce projet coniste à définir un système qui  permet aux individuelles d'effectuer des votes sur plusieurs choix, 
