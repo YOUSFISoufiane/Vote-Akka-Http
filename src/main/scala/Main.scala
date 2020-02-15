@@ -72,14 +72,23 @@ object Main extends App {
      * Code: 204, Message: OK
      * Code: 422, Message: Unexpected error, DataType: Error
      */
-    override def pollDelete(idPoll: Int)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = ???
+    override def pollDelete(idPoll: Int)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+      val response = (pollManager ? PollManager.DeletePoll(idPoll)).mapTo[Option[Poll]]
+      requestcontext => {
+        response.flatMap {
+          case None
+          => pollDelete204(requestcontext)
+          case Some(err: Error)
+          => pollDelete422(err)(toEntityMarshallerError)(requestcontext)
+        }
+      }
+    }
 
     /**
      * Code: 200, Message: a poll object, DataType: List[Poll]
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def pollGet()(implicit toEntityMarshallerPollarray: ToEntityMarshaller[List[Poll]], toEntityMarshallerError: ToEntityMarshaller[Error]): Route = {
-
 
       val response = (pollManager ? PollManager.GetAllPolls).mapTo[Either[List[Poll], Error]]
 
@@ -99,6 +108,7 @@ object Main extends App {
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def pollPost(body: Poll)(implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route = {
+
       val response = (pollManager ? PollManager.PostPoll(body)).mapTo[Option[Error]]
       requestcontext =>
         response.flatMap {
@@ -119,6 +129,7 @@ object Main extends App {
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def pollPut(body: Poll, idPoll: Int)(implicit toEntityMarshallerPoll: ToEntityMarshaller[Poll], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+
       val response = (pollManager ? PollManager.PutPoll(idPoll,body)).mapTo[Option[Error]]
       requestcontext =>
         response.flatMap {
@@ -137,6 +148,7 @@ object Main extends App {
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def votePost(body: Vote)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+
       val response = (voteManager ? VoteManager.PostVote(body)).mapTo[Option[Error]]
       requestcontext =>
         response.flatMap {
@@ -154,6 +166,7 @@ object Main extends App {
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def voteStatsIdPollGet(idPoll: Int)(implicit toEntityMarshallerStat: ToEntityMarshaller[Stat], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
+
       val response = (voteManager ? VoteManager.GetStatsOfPoll(idPoll)).mapTo[Either[Stat, Error]]
       requestcontext =>
         response.flatMap {

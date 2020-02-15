@@ -19,21 +19,21 @@ class DefaultApi(
   import defaultMarshaller._
 
   lazy val route: Route =
-  //    path("poll") { (idPoll) =>
-  //      delete {
-  //
-  //
-  //
-  //
-  //
-  //        defaultService.pollDelete(idPoll = idPoll)
-  //
-  //
-  //
-  //
-  //
-  //      }
-  //    } ~
+      path("poll" / IntNumber) { (idPoll) =>
+        delete {
+
+
+
+
+
+          defaultService.pollDelete(idPoll = idPoll)
+
+
+
+
+
+        }
+      } ~
     path("vote" / "stats" / IntNumber) { (idPoll) =>
       get {
 
@@ -63,15 +63,15 @@ class DefaultApi(
 
         }
       } ~
-      //      path("poll") {
-      //        (idPoll) => put {
-      //
-      //          entity(as[Poll]){ body =>
-      //            defaultService.pollPut(body = body, idPoll = idPoll)
-      //          }
-      //
-      //        }
-      //      } ~
+            path("poll"/ IntNumber) {
+              (idPoll) => put {
+
+                entity(as[Poll]){ body =>
+                  defaultService.pollPut(body = body, idPoll = idPoll)
+                }
+
+              }
+            } ~
       path("vote") {
         post {
 

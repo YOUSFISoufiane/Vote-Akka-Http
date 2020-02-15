@@ -3,7 +3,7 @@ package io.swagger.server
 import akka.actor.{Actor, ActorLogging, Props}
 import io.swagger.server.PollManager.{DeletePoll, GetAllPolls, GetListChoixByIdPoll, PostPoll, PutPoll}
 import io.swagger.server.model.{Error, Poll}
-
+import scala.collection.mutable.Map
 
 object PollManager {
 
@@ -24,7 +24,6 @@ class PollManager extends ActorLogging with Actor {
   var polls: Map[Int, Poll] = Map(
     // empty
   ).withDefaultValue(null)
-
 
   var lastIdPoll: Int = 0
   var lastIdChoix: Int = 0
@@ -61,10 +60,12 @@ class PollManager extends ActorLogging with Actor {
       if (poll != null) {
         sender ! Some(poll.choix)
       } else {
+        println("Nil")
         sender ! None
       }
     }
     case DeletePoll(idpoll) => {
+      polls.retain((k,v) => v.id!= idpoll)
 
     }
 
