@@ -4,6 +4,52 @@ import akka.actor.{Actor, ActorLogging, Props}
 import io.swagger.server.PollManager.{DeletePoll, GetAllPolls, GetListChoixByIdPoll, PostPoll, PutPoll}
 import io.swagger.server.model.{Error, Poll}
 import scala.collection.mutable.Map
+/*
+La logique Approximative de communication : ( sans prendre en compte toutes les paramètres )
+
+
+API                    PollManager                      VoteManager
+  |                        |                               |
+  |--PostPoll(id,choix...)->                               |
+  |                        |CréerPoll--                    |
+  |                        |          |                    |
+  |                        |<-  -  - -|                    |
+  |<----201--------------- |                               |
+  |                        |                               |
+  |----------PostVote(idPoll,idchoix,dateDebut...)--------->
+  |                        |<-------- Check Poll and choix |
+  |                        |                               |
+  |                        |-----------Response----------->|
+  |                        |                               |
+  |<--------------------201 -------------------------------|
+  |                        |                               |
+  |                        |                               |
+  |----GetStatsById(idPoll)------------------------------->|
+  |                        |<---------Get list_choix(id)---|
+  |                        |                               |
+  |                        |----List(idChoix)--------------|CalculerStats--
+  |                        |                               |              |
+  |                        |<-ResponseAllocatePlace--------|              |
+  |                        |                               |<--------------
+  |200-----------------------------------------------------|
+  |---GetPoll--------------|getallpoll--                   |
+  |                        |           |                   |
+  |                        |           |                   |
+  |                        |<-----------                   |
+  |<------------200--------|                               |
+  |                        |                               |
+  |                        |                               |
+  |------PutPoll(idPoll)-->|updatepoll(Poll)--             |
+  |                        |                 |             |
+  |                        |                 |             |
+  |                        |<-----------------             |
+  |<--------200------------|                               |
+  |                        |                               |
+  |----DeletePoll(idPoll)->|deletePoll--                   |
+  |                        |           |                   |
+  |                        |           |                   |
+  |                        |<-----------                   |
+*/
 
 object PollManager {
 
@@ -65,8 +111,22 @@ class PollManager extends ActorLogging with Actor {
       }
     }
     case DeletePoll(idpoll) => {
-      polls.retain((k,v) => v.id!= idpoll)
+      if (polls.isEmpty) {
+        sender ! Some(Error("404"))
+      }
 
+      else
+      {
+        if (polls.values.exists(_.id == idpoll))
+        {
+          println("1")
+
+          polls.retain((k,v) => v.id != idpoll)
+          sender ! None
+          println("2")
+        }
+        else sender ! Some(Error("Sortie introuvable"))
+      }
     }
 
   }

@@ -19,21 +19,7 @@ class DefaultApi(
   import defaultMarshaller._
 
   lazy val route: Route =
-      path("poll" / IntNumber) { (idPoll) =>
-        delete {
 
-
-
-
-
-          defaultService.pollDelete(idPoll = idPoll)
-
-
-
-
-
-        }
-      } ~
     path("vote" / "stats" / IntNumber) { (idPoll) =>
       get {
 
@@ -48,6 +34,21 @@ class DefaultApi(
 
 
           defaultService.pollGet()
+
+
+        }
+      } ~
+      path("poll" / IntNumber) { (idPoll) =>
+        delete {
+
+
+
+
+
+          defaultService.pollDelete(idPoll = idPoll)
+
+
+
 
 
         }

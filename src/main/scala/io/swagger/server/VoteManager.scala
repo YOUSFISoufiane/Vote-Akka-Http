@@ -9,7 +9,52 @@ import akka.util.Timeout
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+/*
+La logique Approximative de communication : ( sans prendre en compte toutes les paramètres )
 
+
+API                    PollManager                      VoteManager
+  |                        |                               |
+  |--PostPoll(id,choix...)->                               |
+  |                        |CréerPoll--                    |
+  |                        |          |                    |
+  |                        |<-  -  - -|                    |
+  |<----201--------------- |                               |
+  |                        |                               |
+  |----------PostVote(idPoll,idchoix,dateDebut...)--------->
+  |                        |<-------- Check Poll and choix |
+  |                        |                               |
+  |                        |-----------Response----------->|
+  |                        |                               |
+  |<--------------------201 -------------------------------|
+  |                        |                               |
+  |                        |                               |
+  |----GetStatsById(idPoll)------------------------------->|
+  |                        |<---------Get list_choix(id)---|
+  |                        |                               |
+  |                        |----List(idChoix)--------------|CalculerStats--
+  |                        |                               |              |
+  |                        |<-ResponseAllocatePlace--------|              |
+  |                        |                               |<--------------
+  |200-----------------------------------------------------|
+  |---GetPoll--------------|getallpoll--                   |
+  |                        |           |                   |
+  |                        |           |                   |
+  |                        |<-----------                   |
+  |<------------200--------|                               |
+  |                        |                               |
+  |                        |                               |
+  |------PutPoll(idPoll)-->|updatepoll(Poll)--             |
+  |                        |                 |             |
+  |                        |                 |             |
+  |                        |<-----------------             |
+  |<--------200------------|                               |
+  |                        |                               |
+  |----DeletePoll(idPoll)->|deletePoll--                   |
+  |                        |           |                   |
+  |                        |           |                   |
+  |                        |<-----------                   |
+*/
 
 object VoteManager {
 

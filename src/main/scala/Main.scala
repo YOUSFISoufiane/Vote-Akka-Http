@@ -72,13 +72,13 @@ object Main extends App {
      * Code: 204, Message: OK
      * Code: 422, Message: Unexpected error, DataType: Error
      */
-    override def pollDelete(idPoll: Int)(implicit toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
-      val response = (pollManager ? PollManager.DeletePoll(idPoll)).mapTo[Option[Poll]]
+    override def pollDelete(idPoll: Int)(implicit toEntityMarshallerError: ToEntityMarshaller[Error]): Route = {
+      val response = (pollManager ? PollManager.DeletePoll(idPoll)).mapTo[Option[Error]]
       requestcontext => {
         response.flatMap {
           case None
           => pollDelete204(requestcontext)
-          case Some(err: Error)
+          case Some(err:Error)
           => pollDelete422(err)(toEntityMarshallerError)(requestcontext)
         }
       }
