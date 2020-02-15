@@ -27,7 +27,7 @@ API                    PollManager                      VoteManager
   |----GetStatsById(idPoll)------------------------------->|
   |                        |<---------Get list_choix(id)---|
   |                        |                               |
-  |                        |----List(idChoix)--------------|CalculerStats--
+  |                        |----List(idChoix)--------------|calculerStats--
   |                        |                               |              |
   |                        |<-ResponseAllocatePlace--------|              |
   |                        |                               |<--------------
@@ -93,7 +93,7 @@ class PollManager extends ActorLogging with Actor {
       if (poll == null) {
         sender ! Some(Error("404"))
       }
-      polls.updated(poll.id.get, poll.copy(
+      polls = polls.updated(poll.id.get, poll.copy(
         titles = body.titles,
         dupcheck = body.dupcheck,
         captcha = body.captcha,
@@ -110,24 +110,20 @@ class PollManager extends ActorLogging with Actor {
         sender ! None
       }
     }
-    case DeletePoll(idpoll) => {
-      if (polls.isEmpty) {
+    case DeletePoll(idpoll) =>
+      val poll = polls.getOrElse(idpoll, null)
+
+      if (poll == null) {
         sender ! Some(Error("404"))
       }
 
-      else
-      {
-        if (polls.values.exists(_.id == idpoll))
-        {
-          println("1")
+      else {
 
-          polls.retain((k,v) => v.id != idpoll)
-          sender ! None
-          println("2")
-        }
-        else sender ! Some(Error("Sortie introuvable"))
+        polls = polls.filter(_._1 != idpoll)
+
+        sender ! None
+
       }
-    }
 
   }
 }

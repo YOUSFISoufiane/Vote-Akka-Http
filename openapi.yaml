@@ -1,0 +1,243 @@
+openapi: 3.0.1
+info:
+  title: Api de Vote  Akka-Http
+  description: Une API qui décrit un système de Vote en utilisant Akka-Http
+  version: "1.0.0"
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Souf/Akka-Vote/1.0.0
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Souf7/VoteAkkaAPI/1.0.0
+  - url: 'http://localhost:8080/api'
+paths:
+  /vote/stats/{idPoll}:
+    get:
+      summary: get Stats by Poll id
+      description: get final result stat
+      parameters:
+        - name: idPoll
+          in: path
+          description: ID of poll
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: a stat object
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Stat'
+        '422':
+          description: Unexpected error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /vote/{idChoix}:
+    post:
+      summary: Voter Pour un choix dans un poll
+      parameters:
+        - name: idChoix
+          in: path
+          description: ID of Choice
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: '----'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vote'
+      responses:
+        '201':
+          description: Vote added
+        '400':
+          description: Bad Request
+          content:
+            /:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unexpected error
+          content:
+            /:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /poll:
+    post:
+      summary: Ajouter une Poll
+      requestBody:
+        description: add a new poll with Options
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        '201':
+          description: poll created
+        '400':
+          description: Bad Request
+          content:
+            /:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unexpected error
+          content:
+            /:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: get all the polls
+      description: get all the polls
+      responses:
+        '200':
+          description: a poll object
+          content:
+            '*/*':
+              schema:
+                type:
+                  array
+                items:
+                  $ref: '#/components/schemas/Poll'
+        '422':
+          description: Unexpected error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /poll/{idPoll}:
+    put:
+      summary: Modifier une Poll
+      description: Poll edit
+      parameters:
+        - name: idPoll
+          in: path
+          description: ID of Poll
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: A JSON object containing Poll information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Unexpected error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: delete a poll  by id
+      description: delete by  id
+      parameters:
+        - name: idPoll
+          in: path
+          description: ID of poll
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: OK
+        '422':
+          description: Unexpected error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Poll:
+      required:
+        - titles
+        - choix
+        - dupcheck
+        - captcha
+      properties:
+        id:
+          type: integer
+        titles:
+          type: string
+        choix:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choix'
+        dupcheck:
+          type: array
+          enum:
+            - normal
+            - permissive
+            - disabled
+          default:
+            - normal
+        captcha:
+          type: boolean
+    Choix:
+      required:
+        - content
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        idPoll:
+          type: integer
+    Vote:
+      required:
+        - dateDebut
+        - dateFin
+        - idChoix
+      properties:
+        id:
+          type: integer
+        dateDebut:
+          type: string
+          format: date-time
+        dateFin:
+          type: string
+          format: date-time
+        idChoix:
+          type: integer
+    Error:
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    Stat:
+      required:
+        - nb_participants
+        - votes
+      properties:
+        nb_participants:
+          type:
+            integer
+        votes:
+          type:
+            array
+          items:
+            type: object
+            properties:
+              id_choix:
+                type: integer
+              percentage:
+                type: number
