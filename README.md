@@ -184,11 +184,17 @@ http://localhost:9000/api/poll/1
 #### CAPTURES DE TEST :
 
 ###### GET ALL POLLS ######
+![GET ALL](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/Get%20all%20Polls.jpg)
 ###### GET STATS BY ID ######
+![GET STAT](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/Get%20Stats%20By%20Id%20Poll.jpg)
 ###### POST POLL ######
+![POST POLL](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/Post%20Poll%20.jpg)
 ###### POST VOTE BY ID CHOIX ######
+![POST VOTE](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/Post%20Vote%20.jpg)
 ###### PUT POLLS ######
+![PUT POLLS](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/PUT%20POLL.jpg)
 ###### DELETE POLL BY ID ######
+![DELETE](https://github.com/YOUSFISoufiane/Vote-Akka-Http/blob/master/img/Delete%20Poll.jpg)
 
 
 
