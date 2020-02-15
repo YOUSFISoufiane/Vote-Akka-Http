@@ -154,7 +154,7 @@ object Main extends App {
      * Code: 422, Message: Unexpected error, DataType: Error
      */
     override def voteStatsIdPollGet(idPoll: Int)(implicit toEntityMarshallerStat: ToEntityMarshaller[Stat], toEntityMarshallerError: ToEntityMarshaller[model.Error]): Route = {
-      val response = (voteManager ? VoteManager.GetStatsById).mapTo[Either[Stat, Error]]
+      val response = (voteManager ? VoteManager.GetStatsOfPoll(idPoll)).mapTo[Either[Stat, Error]]
       requestcontext =>
         response.flatMap {
           case Left(res)
